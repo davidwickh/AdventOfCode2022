@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -43,7 +42,6 @@ def part_1():
     priority = 0
     with open('input.txt') as f:
         for line in f.read().splitlines():
-            # split line into letters
             letters = list(line)
             rucksack = Rucksack(full_content=letters)
             priority_mapping = PriorityMapping()
