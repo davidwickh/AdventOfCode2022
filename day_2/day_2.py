@@ -98,7 +98,7 @@ class ScoreCalculator:
         self.player_score += self.__getattribute__(selected_shape)
         self.player_score += 0
 
-    def process_game(self, player_shape, opponent_shape):
+    def process_round(self, player_shape, opponent_shape):
         if player_shape == opponent_shape:
             self.draw(player_shape)
         elif player_shape == "rock" and opponent_shape == "scissor":
@@ -117,49 +117,42 @@ class ScoreCalculator:
             raise ValueError(f"Invalid shapes {player_shape} {opponent_shape}")
 
 
-def read_input_part_1(opponent_mapping, player_mapping) -> dict[str, list[str]]:
-    """
-    Handles the reading in and parsing of the input file
-    :return: (dict)
-        dictionary of turns
-    """
-    turns = {"player": [], 'opponent': []}
-    with open("input.txt") as f:
-        for line in f.read().splitlines():
-            opponent, player = line.split()
-            turns['opponent'].append(opponent_mapping.get_shape_played(opponent))
-            turns['player'].append(player_mapping.get_shape_played(player))
+class ReadInputData:
+    def __init__(self, input_file='input.txt'):
+        self.input_file = input_file
+        self.turns = {"player": [], 'opponent': []}
 
-    return turns
+    def read_input_part_1(self, opponent_mapping, player_mapping):
+        with open(self.input_file) as f:
+            for line in f.read().splitlines():
+                opponent, player = line.split()
+                self.turns['opponent'].append(opponent_mapping.get_shape_played(opponent))
+                self.turns['player'].append(player_mapping.get_shape_played(player))
+        return self.turns
+
+    def read_input_part_2(self, opponent_mapping, outcome_mapping):
+        with open("input.txt") as f:
+            for line in f.read().splitlines():
+                opponent, outcome = line.split()
+                opponent_shape = opponent_mapping.get_shape_played(opponent)
+                outcome = outcome_mapping.get_outcome(outcome)
+                player_shape = get_play(opponent_shape, outcome)
+
+                self.turns['opponent'].append(opponent_shape)
+                self.turns['player'].append(player_shape)
+        return self.turns
 
 
-def read_input_part_2(opponent_mapping, outcome_mapping) -> dict[str, list[str]]:
-    """
-    Handles the reading in and parsing of the input file
-    :return: (dict)
-        dictionary of turns
-    """
-    turns = {"player": [], 'opponent': []}
-    with open("input.txt") as f:
-        for line in f.read().splitlines():
-            opponent, outcome = line.split()
-            opponent_shape = opponent_mapping.get_shape_played(opponent)
-            outcome = outcome_mapping.get_outcome(outcome)
-            player_shape = get_play(opponent_shape, outcome)
-
-            turns['opponent'].append(opponent_shape)
-            turns['player'].append(player_shape)
-
-    return turns
 
 
 def part_1():
     shape_code_mapping_opponent = ShapeCodeMappingOpponent()
     shape_code_mapping_player = ShapeCodeMappingPlayer()
     score_calculator = ScoreCalculator()
-    turns = read_input_part_1(shape_code_mapping_opponent, shape_code_mapping_player)
+    read_in_data = ReadInputData()
+    turns = read_in_data.read_input_part_1(shape_code_mapping_opponent, shape_code_mapping_player)
     for player_shape, opponent_shape in zip(turns['player'], turns['opponent']):
-        score_calculator.process_game(player_shape, opponent_shape)
+        score_calculator.process_round(player_shape, opponent_shape)
 
     print(f'Part 1 ans: {score_calculator.player_score}')
 
@@ -168,9 +161,10 @@ def part_2():
     shape_code_mapping_opponent = ShapeCodeMappingOpponent()
     outcome_mapping = OutcomeMapping()
     score_calculator = ScoreCalculator()
-    turns = read_input_part_2(shape_code_mapping_opponent, outcome_mapping)
+    read_in_data = ReadInputData()
+    turns = read_in_data.read_input_part_2(shape_code_mapping_opponent, outcome_mapping)
     for player_shape, opponent_shape in zip(turns['player'], turns['opponent']):
-        score_calculator.process_game(player_shape, opponent_shape)
+        score_calculator.process_round(player_shape, opponent_shape)
 
     print(f'Part 2 ans: {score_calculator.player_score}')
 
