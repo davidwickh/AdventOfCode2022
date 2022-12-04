@@ -38,6 +38,27 @@ class Rucksack:
         return repeated_items
 
 
+@dataclass
+class ElfGroup:
+    rucksacks: dict[Rucksack]
+
+    def add_rucksack(self, rucksack: Rucksack):
+        number_of_keys = len(self.rucksacks)
+        self.rucksacks[f'rucksack_{number_of_keys}'] = rucksack
+
+    def find_repeated_items(self):
+        # separate out values of dictionary into separate lists
+        rucksack_0 = self.rucksacks['rucksack_0']
+        rucksack_1 = self.rucksacks['rucksack_1']
+        rucksack_2 = self.rucksacks['rucksack_2']
+
+        repeated_items = []
+        for item in rucksack_0.full_content:
+            if item in rucksack_1.full_content and item in rucksack_2.full_content:
+                repeated_items.append(item)
+        return repeated_items
+
+
 def part_1():
     priority = 0
     with open('input.txt') as f:
@@ -52,5 +73,22 @@ def part_1():
     print(f"Part 1: {priority}")
 
 
+def part_2():
+    priority = 0
+    with open('input.txt') as f:
+        for index, line in enumerate(f.read().splitlines()):
+            letters = list(line)
+            if index % 3 == 0:
+                rucksack_group = ElfGroup(rucksacks={})
+            rucksack = Rucksack(full_content=letters)
+            rucksack_group.add_rucksack(rucksack)
+            if index % 3 == 2:
+                priority_mapping = PriorityMapping()
+                badge = rucksack_group.find_repeated_items()
+                priority += priority_mapping.get_priority(badge[0])
+
+    print(f"Part 2: {priority}")
+
+
 if __name__ == "__main__":
-    part_1()
+    part_2()
